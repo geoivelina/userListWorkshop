@@ -8,8 +8,6 @@ function App() {
             <Header />
             <main className="main">
                 <UserList />
-
-                
             </main>
             <Footer />
         </div>
