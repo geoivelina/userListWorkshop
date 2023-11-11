@@ -1,11 +1,14 @@
-import UserListItem from "./UserListItem";
 import { useEffect, useState } from "react";
 import * as userService from "../services/userService";
+import UserListItem from "./UserListItem";
 import CreateUserModel from "./createUserMode";
+import UserInfoModal from "./UserInfoModal";
 
 export default function UserListTable() {
     const [users, setUsers] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
     useEffect(() => {
         userService
@@ -26,21 +29,30 @@ export default function UserListTable() {
         const formData = new FormData(e.currentTarget);
         const data = Object.fromEntries(formData);
         const newUser = await userService.create(data);
-        
-        setUsers(state => [...state, newUser]);
-        
+
+        setUsers((state) => [...state, newUser]);
+
         setShowCreateForm(false);
     };
 
+    const userInfoClickHandler = async (userId) => {
+        setSelectedUser(userId);
+        setShowInfo(true);
+    };
     return (
         <div className="table-wrapper">
             {showCreateForm && (
                 <CreateUserModel
                     hideModal={hideCreateUserModal}
-                    onUserCreate={onUserCreateHandler}
+                    onCreate={onUserCreateHandler}
+                    onInfoClick={userInfoClickHandler}
                 />
             )}
-
+            {showInfo && 
+                <UserInfoModal 
+                onClose={() => setShowInfo(false)} 
+                userId = {selectedUser}
+            />}
             <table className="table">
                 <thead>
                     <tr>
@@ -140,7 +152,11 @@ export default function UserListTable() {
                 </thead>
                 <tbody>
                     {users.map((user) => (
-                        <UserListItem key={user._id} {...user} />
+                        <UserListItem
+                            key={user._id}
+                            {...user}
+                            onInfoClick={userInfoClickHandler}
+                        />
                     ))}
                 </tbody>
             </table>
